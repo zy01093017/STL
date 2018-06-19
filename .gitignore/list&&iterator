@@ -1,0 +1,156 @@
+//链表的结点
+template<class T>
+struct ListNode  
+{
+	ListNode<T>* _next;
+	ListNode<T>* _prev;
+	T _data;
+
+	ListNode(const T& x = T())
+		:_data(x)
+		, _next(nullptr)
+		, _prev(nullptr)
+	{}
+
+};
+
+//模板参数，定义为类型T，T的引用，T的指针
+template<class T, class Ref, class Ptr>
+struct MyIterator
+{
+	typedef ListNode<T> Node;//将node节点重名名为node
+	typedef MyIterator<T, Ref, Ptr> Self;//将自己重命名为self
+	Node* _node;
+
+	MyIterator(Node* node)
+		:_node(node)
+	{}
+
+	Ref operator*()//引用
+	{
+		return _node->_data;
+	}
+
+	Ptr operator->()//指针
+	{
+		return &(operator*());
+	}
+
+	Self& operator++()//前置++
+	{
+		_node = _node->_next;
+		return *this;
+	}
+
+	Self operator++(int)//后置++
+	{
+		Self tmp(_node);
+		_node = _node->_next;
+
+		return tmp;
+	}
+
+	Self& operator--()//前置--
+	{
+		_node = _node->_prev;
+		return *this;
+	}
+
+	Self operator--(int)//后置--
+	{
+		Self tmp(_node);
+		_node = _node->_prev;
+		return tmp;
+	}
+	bool operator==(const Self& s) const//const迭代器
+	{
+		return _node == s._node;
+	}
+	bool operator!=(const Self& s) const
+	{
+		return _node != s._node;
+	}
+};
+
+template<class T>
+class MyList
+{
+	typedef ListNode<T> Node;
+public:
+	typedef MyIterator<T, T&, T*> Iterator;//声明
+	typedef MyIterator<T, const T&, const T*> ConstIterator;
+
+	MyList()
+	{
+		_head = new Node;
+		_head->_next = _head;
+		_head->_prev = _head;
+	}
+
+	void Insert(Iterator pos, const T& x)
+	{
+		Node* cur = pos._node;
+		Node* next = cur->_next;
+		Node* newnode = new Node(x);
+
+		//cur next newnode
+		newnode->_next = next;
+		next->_prev = newnode;
+
+		newnode->_prev = cur;
+		cur->_next = newnode;
+	}
+
+	void Erase(Iterator pos)
+	{
+		Node* cur = pos._node;
+		Node* next = cur->_next;
+		Node* prev = cur->_prev;
+
+		//prev pos next
+		prev->_next = next;
+		next->_prev = prev;
+
+		delete cur;
+	}
+	void PushBack(const T& x)
+	{
+		Node*  tail = _head->_prev;
+
+		Node* newnode = new Node(x);
+
+		newnode->_next = tail->_next;
+		_head->_prev = newnode;
+
+		tail->_next = newnode;
+		newnode->_prev = tail;
+	}
+
+	
+	Iterator Begin()//迭代器的开始
+	{
+		return _head->_next;
+	}
+	
+	Iterator End()//迭代器的结束
+	{
+		return _head;
+	}
+	
+	ConstIterator Begin() const
+	{
+		//return Iterator(_head->_next);
+		return _head->_next;
+	}
+
+	ConstIterator End() const
+	{
+		//return Iterator(_head);
+		return _head;
+	}
+
+
+
+protected:
+	Node* _head;
+};
