@@ -1,0 +1,128 @@
+template<class T>
+class MyVector
+{
+public:
+	typedef T* Iterator;//vector的迭代器就是一个T*,因为是个数组
+	typedef const T* ConstIterator;
+
+	MyVector()
+		:_start(0)
+		, _finish(0)
+		, _endofstorage(0)
+	{}
+
+	~MyVector()
+	{
+		delete[] _start;
+		_start = _finish = _endofstorage = 0;
+	}
+
+	size_t Capacity()//扩容
+	{
+		return _endofstorage - _start;
+	}
+
+	size_t Size()//大小
+	{
+		return _finish - _start;
+	}
+
+	void Reserve(size_t n)//开空间
+	{
+		Expand(n);
+	}
+
+	void Resize(size_t n, const T& val = T())//三种情况，当n>size,开空间，并初始化；n < size, 去除数据；n
+	{
+		if (n < Size())
+		{
+			_finish = _start + n;
+		}
+		else
+		{
+			if (n > Capacity())
+			{
+				Expand(n);
+			}
+
+			while (_finish != _start + n)
+			{
+				*_finish = val;
+				++_finish;
+			}
+		}
+	}
+
+	void Expand(size_t n)
+	{
+		if (n > Capacity())
+		{
+			size_t size = Size();
+			T* tmp = new T[n];
+			for (size_t i = 0; i < size; ++i)
+			{
+				tmp[i] = _start[i];
+			}
+			delete[] _start;
+			_start = tmp;
+			_finish = _start + size;
+			_endofstorage = _start + n;
+		}
+	}
+
+	void PushBack(const T& x)
+	{
+		if (_finish == _endofstorage)
+		{
+			size_t capacity = Capacity() * 2;
+			if (capacity == 0)
+				capacity = 3;
+			Expand(capacity);
+		}
+
+		*_finish = x;
+		++_finish;
+	}
+
+	
+	T& operator[](size_t pos)
+	{
+		assert(pos < Size());
+		return _start[pos];
+	}
+
+	T& at(size_t pos)
+	{
+		if (pos >= Size())
+		{
+			throw out_of_range("pos out of range");
+		}
+
+		return _start[pos];
+	}
+
+	Iterator Begin()
+	{
+		return _start;
+	}
+
+	Iterator End()
+	{
+		return _finish;
+	}
+
+	ConstIterator Begin() const
+	{
+		return _start;
+	}
+
+	ConstIterator End() const
+	{
+		return _finish;
+	}
+
+protected:
+	Iterator _start;
+	Iterator _finish;
+	Iterator _endofstorage;
+};
